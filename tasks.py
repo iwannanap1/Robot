@@ -34,7 +34,7 @@ def order_another_robot():
 def read_as_a_table():
     robot = Tables()
     orders = robot.read_table_from_csv(
-        "orders.csv", columns=["Order Number", "Head", "Body", "Legs", "Address"]
+        "orders.csv", columns=["Order number", "Head", "Body", "Legs", "Address"]
     )
     for row in orders:
         fill_the_form(row)
@@ -46,23 +46,23 @@ def close_annoying_modal():
 def fill_the_form(row):
     page = browser.page()
 
-    page.fill("#address",row["Address"])
+    page.fill("#address", row["Address"])
     page.select_option("#head", row["Head"])
     page.locator('.form-control').nth(0).fill(row["Legs"])
     page.locator(f".form-check-input[value='{row['Body']}']").check()
     page.click("#preview")
-    try:
-        page.click("#order")
-    except Exception as e:
-        print(f"error occured: {e}. Retrying...")
-        page.click("#order")
-    order_another = page.query_selector("#order-another")
-    if order_another:
-        pdf_path = store_order_receipt(row["Order Number"])
-        screenshot_path = screenshot_robot(row["Order Number"])
-        embed_screenshot_to_receipt(screenshot_path, pdf_path)
-        order_another_robot()
-        # close_annoying_modal()
+    
+    while True:
+        page.click("css=#order")
+        order_another = page.query_selector("css=#order-another")
+        if order_another:
+            pdf_path = store_order_receipt(row["Order number"])
+            screenshot_path = screenshot_robot(row["Order number"])
+            embed_screenshot_to_receipt(screenshot_path, pdf_path)
+            order_another_robot()
+            break
+        else: 
+            print("order failed")
       
 def store_order_receipt(order_number):
     page=browser.page()
